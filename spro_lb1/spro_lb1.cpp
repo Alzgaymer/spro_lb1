@@ -122,7 +122,7 @@ LRESULT CALLBACK WndProc(
 		}
 		break;
 	case WM_CREATE:
-		RECT rt;
+		/*RECT rt;
 		GetClientRect(hWnd, &rt);
 		for (size_t y = 0, i = 0; y < rt.bottom && i < arr.size(); y += 20, i++)
 		{
@@ -132,11 +132,14 @@ LRESULT CALLBACK WndProc(
 				0, y,
 				110, 20,
 				hWnd, 0, 0, 0);
-		}
+		}*/
 		InitializeCriticalSection(&cs);
-
+		
 		CreateThread(0, 0, &RefreshTime, 0, 0, 0);
-		CreateThread(0, 0, &TimeOut, 0, 0, 0);
+		CreateThread(0, 0, &TimeOut,hWnd, 0, 0);
+		break;
+	case WM_SIZE:
+		GetClientRect(hWnd, &rt);
 		break;
 	case WM_DESTROY:
 		isexit = true;
@@ -154,16 +157,38 @@ LRESULT CALLBACK WndProc(
 DWORD WINAPI TimeOut(CONST LPVOID lParam)
 {
 	using namespace std::chrono_literals;
-	while (isexit == false) {
-		EnterCriticalSection(&cs);
-		for (size_t i = 0; i < arr.size(); i++)
-		{
-			SetWindowText(arr[i], t.wstr.c_str());
-		}
-		LeaveCriticalSection(&cs);
+	
 
-		//std::this_thread::sleep_for(6ms);
+	while (!isexit)
+	{
+		HDC hdc = GetDC((HWND)lParam);
+
+		HDC dc = CreateCompatibleDC(hdc);
+
+		HBITMAP hbm = CreateCompatibleBitmap(hdc, rt.right - rt.left, rt.bottom - rt.top);
+		SelectObject(dc, hbm);
+		SelectObject(dc, GetStockObject(DC_PEN));
+		//SetDCPenColor(dc, RGB(0, 0, 0));
+		EnterCriticalSection(&cs);
+
+		TextOut(dc, 0, 0, t.wstr.c_str(), t.wstr.end() - t.wstr.begin());
+		BitBlt(hdc, 0, 0, rt.right - rt.left, rt.bottom - rt.top, dc, 0, 0, SRCCOPY);
+		LeaveCriticalSection(&cs);
+		DeleteDC(dc);
+		DeleteObject(hbm);
+		
 	}
+	
+	//while (isexit == false) {
+	//	for (size_t i = 0; i < arr.size(); i++)
+	//	{
+	//		EnterCriticalSection(&cs);
+	//		SetWindowText(arr[i], t.wstr.c_str());
+	//		LeaveCriticalSection(&cs);
+	//	}
+
+	//	//std::this_thread::sleep_for(6ms);
+	//}
 	ExitThread(25);
 }
 
@@ -171,18 +196,19 @@ DWORD WINAPI RefreshTime(CONST LPVOID)
 {
 	while (isexit == false)
 	{
-		EnterCriticalSection(&cs);
+		
 
 #pragma warning(disable : 4996)
 		//C style define time
-		char buffer[64];
+		const size_t buffersize = 14;
+		char buffer[buffersize];
 		time_t seconds = time(NULL);
 		tm* timeinfo = localtime(&seconds);
 		const char* format = "%Y %I:%M:%S";
-		strftime(buffer, 80, format, timeinfo);
-		std::wstring wstr2(80, L'#');
-		mbstowcs(&wstr2[0], buffer, 80);
-
+		strftime(buffer, buffersize, format, timeinfo);
+		std::wstring wstr2(buffersize, L'#');
+		mbstowcs(&wstr2[0], buffer, buffersize);
+		EnterCriticalSection(&cs);
 		t.wstr = wstr2;
 
 		LeaveCriticalSection(&cs);

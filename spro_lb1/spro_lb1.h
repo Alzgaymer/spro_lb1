@@ -12,7 +12,8 @@ static bool isexit = false;
 static HWND hwndHandle;
 using std::vector;
 static CRITICAL_SECTION cs;
-static vector<HWND> arr{ 14 };
+static RECT rt;
+//static vector<HWND> arr{ 14 };
 #pragma endregion
 
 LRESULT CALLBACK WndProc(
