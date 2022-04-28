@@ -122,17 +122,6 @@ LRESULT CALLBACK WndProc(
 		}
 		break;
 	case WM_CREATE:
-		/*RECT rt;
-		GetClientRect(hWnd, &rt);
-		for (size_t y = 0, i = 0; y < rt.bottom && i < arr.size(); y += 20, i++)
-		{
-			arr[i] = CreateWindow(_T("static"),
-				t.wstr.c_str(),
-				WS_CHILD | WS_VISIBLE,
-				0, y,
-				110, 20,
-				hWnd, 0, 0, 0);
-		}*/
 		InitializeCriticalSection(&cs);
 		
 		CreateThread(0, 0, &RefreshTime, 0, 0, 0);
@@ -160,35 +149,28 @@ DWORD WINAPI TimeOut(CONST LPVOID lParam)
 	
 
 	while (!isexit)
-	{
+	{	
+		//get window dc
 		HDC hdc = GetDC((HWND)lParam);
 
 		HDC dc = CreateCompatibleDC(hdc);
 
 		HBITMAP hbm = CreateCompatibleBitmap(hdc, rt.right - rt.left, rt.bottom - rt.top);
+		//take bitmap as a dc
 		SelectObject(dc, hbm);
 		SelectObject(dc, GetStockObject(DC_PEN));
-		//SetDCPenColor(dc, RGB(0, 0, 0));
+		
 		EnterCriticalSection(&cs);
-
+		//								gitting wsrt size by subtraction pointers
 		TextOut(dc, 0, 0, t.wstr.c_str(), t.wstr.end() - t.wstr.begin());
+		//copy dc(bitmap) to hdc(our screen)
 		BitBlt(hdc, 0, 0, rt.right - rt.left, rt.bottom - rt.top, dc, 0, 0, SRCCOPY);
 		LeaveCriticalSection(&cs);
+		//release memory
 		DeleteDC(dc);
 		DeleteObject(hbm);
 		
 	}
-	
-	//while (isexit == false) {
-	//	for (size_t i = 0; i < arr.size(); i++)
-	//	{
-	//		EnterCriticalSection(&cs);
-	//		SetWindowText(arr[i], t.wstr.c_str());
-	//		LeaveCriticalSection(&cs);
-	//	}
-
-	//	//std::this_thread::sleep_for(6ms);
-	//}
 	ExitThread(25);
 }
 
@@ -208,6 +190,7 @@ DWORD WINAPI RefreshTime(CONST LPVOID)
 		strftime(buffer, buffersize, format, timeinfo);
 		std::wstring wstr2(buffersize, L'#');
 		mbstowcs(&wstr2[0], buffer, buffersize);
+		//entering critical section
 		EnterCriticalSection(&cs);
 		t.wstr = wstr2;
 

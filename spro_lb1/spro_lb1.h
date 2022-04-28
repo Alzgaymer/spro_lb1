@@ -25,37 +25,6 @@ LRESULT CALLBACK WndProc(
 DWORD WINAPI TimeOut(CONST LPVOID);
 DWORD WINAPI RefreshTime(CONST LPVOID);
 
-//class time {
-//	std::wstring wstr;
-//	auto getCurrentTime()
-//	{
-//		using std::time;
-//#pragma warning(disable : 4996)
-//		//C style define time
-//		char buffer[80];
-//		time_t seconds = time(NULL);
-//		tm* timeinfo = localtime(&seconds);
-//		const char* format = "%Y %I:%M:%S";
-//		strftime(buffer, 80, format, timeinfo);
-//		std::wstring wstr2(80, L'#');
-//		mbstowcs(&wstr2[0], buffer, 80);
-//		return wstr2;
-//	}
-//public:
-//	time()
-//	{
-//		wstr = getCurrentTime();
-//	}
-//	auto GetTime() 
-//	{
-//		return wstr;
-//	}
-//	void SetTime()
-//	{
-//		wstr = getCurrentTime();
-//	}
-//} t;
-
 struct time {
 
 	std::wstring wstr;
