@@ -151,25 +151,25 @@ DWORD WINAPI TimeOut(CONST LPVOID lParam)
 	while (!isexit)
 	{	
 		//get window dc
-		HDC hdc = GetDC((HWND)lParam);
+		HDC WindowDC = GetDC((HWND)lParam);
 
-		HDC dc = CreateCompatibleDC(hdc);
+		HDC TemporaryDC = CreateCompatibleDC(WindowDC);
 
-		HBITMAP hbm = CreateCompatibleBitmap(hdc, rt.right - rt.left, rt.bottom - rt.top);
+		HBITMAP BitmapDC = CreateCompatibleBitmap(WindowDC, rt.right - rt.left, rt.bottom - rt.top);
 		//take bitmap as a dc
-		SelectObject(dc, hbm);
+		SelectObject(TemporaryDC, BitmapDC);
 		
 		//SelectObject(dc, GetStockObject(DC_PEN));
 		//SetDCPenColor(dc, RGB(255, 255, 0));
 		EnterCriticalSection(&cs);
-		//								gitting wsrt size by subtraction pointers
-		TextOut(dc, 0, 0, t.wstr.c_str(), t.wstr.end() - t.wstr.begin());
+		//								gitting wstr size by subtraction pointers
+		TextOut(TemporaryDC, 0, 0, t.wstr.c_str(), t.wstr.end() - t.wstr.begin());
 		//copy dc(bitmap) to hdc(our screen)
-		BitBlt(hdc, 0, 0, rt.right - rt.left, rt.bottom - rt.top, dc, 0, 0, SRCCOPY);
+		BitBlt(WindowDC, 0, 0, rt.right - rt.left, rt.bottom - rt.top, TemporaryDC, 0, 0, SRCCOPY);
 		LeaveCriticalSection(&cs);
 		//release memory
-		DeleteDC(dc);
-		DeleteObject(hbm);
+		DeleteDC(TemporaryDC);
+		DeleteObject(BitmapDC);
 		
 	}
 	ExitThread(25);
