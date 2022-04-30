@@ -158,8 +158,9 @@ DWORD WINAPI TimeOut(CONST LPVOID lParam)
 		HBITMAP hbm = CreateCompatibleBitmap(hdc, rt.right - rt.left, rt.bottom - rt.top);
 		//take bitmap as a dc
 		SelectObject(dc, hbm);
-		SelectObject(dc, GetStockObject(DC_PEN));
 		
+		//SelectObject(dc, GetStockObject(DC_PEN));
+		//SetDCPenColor(dc, RGB(255, 255, 0));
 		EnterCriticalSection(&cs);
 		//								gitting wsrt size by subtraction pointers
 		TextOut(dc, 0, 0, t.wstr.c_str(), t.wstr.end() - t.wstr.begin());
